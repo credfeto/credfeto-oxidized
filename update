@@ -19,9 +19,11 @@ docker compose pull
 OX_UID=$(docker run --rm --entrypoint id "$IMAGE" -u oxidized)
 OX_GID=$(docker run --rm --entrypoint id "$IMAGE" -g oxidized)
 
-install -d -m 0750 "$DATA_DIR" "$DATA_DIR/keys" "$DATA_DIR/crashes"
+install -d -m 0750 "$DATA_DIR" "$DATA_DIR/keys" "$DATA_DIR/crashes" "$DATA_DIR/ssh"
 install -m 0640 oxidized/config "$DATA_DIR/config"
 install -m 0640 oxidized/router.db "$DATA_DIR/router.db"
+# libgit2 (githubrepo hook) checks ~/.ssh/known_hosts; mounted read-only.
+install -m 0644 oxidized/known_hosts "$DATA_DIR/ssh/known_hosts"
 
 for key in devices deploy; do
     if [ ! -f "$DATA_DIR/keys/${key}_ed25519" ]; then

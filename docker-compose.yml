@@ -28,5 +28,7 @@ services:
       CONFIG_RELOAD_INTERVAL: "3600"
     volumes:
       - ${DATA_DIR:-/var/lib/credfeto-oxidized}:/home/oxidized/.config/oxidized
+      # GitHub host keys for the push hook (installed by ./update).
+      - ${DATA_DIR:-/var/lib/credfeto-oxidized}/ssh:/home/oxidized/.ssh:ro
     mem_limit: 512m
     pids_limit: 256

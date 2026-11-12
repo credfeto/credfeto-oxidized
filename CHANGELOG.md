@@ -14,6 +14,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Oxidized stack (docker compose + watchtower) backing up the MikroTik switches hourly to dnyw4l3n13/network-config; ./update installs the config into DATA_DIR and creates the device and deploy SSH keys
 ### Fixed
 - update: key comments use `uname -n` (Arch has no `hostname` binary)
+- GitHub push failing with "invalid or unknown remote ssh hostkey": ship GitHub's SSH host keys as oxidized/known_hosts, installed into DATA_DIR/ssh and mounted read-only at /home/oxidized/.ssh
 ### Changed
 ### Deprecated
 ### Removed
