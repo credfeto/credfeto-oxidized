@@ -1,0 +1,36 @@
+#! /bin/sh
+# Pull the repo, refresh the runtime config in DATA_DIR, create the SSH keys on
+# first run and (re)start the stack. Run as root from the checkout.
+set -eu
+BASEDIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+cd "$BASEDIR"
+[ -f .env ] || { echo "update: create .env from example.env first" >&2; exit 1; }
+env_value() { sed -n "s/^$1=//p" .env | tail -n 1; }
+
+git pull --ff-only
+DATA_DIR=$(env_value DATA_DIR)
+DATA_DIR=${DATA_DIR:-/var/lib/credfeto-oxidized}
+IMAGE="oxidized/oxidized:$(env_value OXIDIZED_TAG)"
+[ "$IMAGE" = "oxidized/oxidized:" ] && IMAGE=oxidized/oxidized:latest
+
+docker compose pull
+# The container runs as its own unprivileged user; take the uid from the image
+# rather than hard-coding it, so DATA_DIR stays writable across image changes.
+OX_UID=$(docker run --rm --entrypoint id "$IMAGE" -u oxidized)
+OX_GID=$(docker run --rm --entrypoint id "$IMAGE" -g oxidized)
+
+install -d -m 0750 "$DATA_DIR" "$DATA_DIR/keys" "$DATA_DIR/crashes"
+install -m 0640 oxidized/config "$DATA_DIR/config"
+install -m 0640 oxidized/router.db "$DATA_DIR/router.db"
+
+for key in devices deploy; do
+    if [ ! -f "$DATA_DIR/keys/${key}_ed25519" ]; then
+        ssh-keygen -q -t ed25519 -N "" -C "oxidized-$key@$(hostname)" -f "$DATA_DIR/keys/${key}_ed25519"
+        echo "update: created $key key. Public key:"
+        cat "$DATA_DIR/keys/${key}_ed25519.pub"
+    fi
+done
+chmod 0600 "$DATA_DIR"/keys/*_ed25519
+chown -R "$OX_UID:$OX_GID" "$DATA_DIR"
+
+docker compose up -d

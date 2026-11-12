@@ -11,6 +11,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ## [Unreleased]
 ### Security
 ### Added
+- Oxidized stack (docker compose + watchtower) backing up the MikroTik switches hourly to dnyw4l3n13/network-config; ./update installs the config into DATA_DIR and creates the device and deploy SSH keys
 ### Fixed
 ### Changed
 ### Deprecated

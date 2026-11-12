@@ -1,0 +1,6 @@
+# name:ip:model - the devices Oxidized backs up (management addresses).
+# MikroTik switches: read-only "backup" user, SSH key auth, allowed only from this VM.
+stairs1:192.168.10.2:routeros
+stairs2:192.168.10.3:routeros
+office:192.168.10.4:routeros
+bedroom:192.168.10.5:routeros

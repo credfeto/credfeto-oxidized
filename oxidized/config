@@ -1,0 +1,53 @@
+---
+# Oxidized configuration. ./update copies this into DATA_DIR; edit it here.
+username: backup
+model: routeros
+interval: 3600
+use_syslog: false
+debug: false
+threads: 4
+timeout: 30
+retries: 2
+# REST API / web UI off: nothing on this VM needs it and nothing is published.
+rest: false
+next_adds_job: false
+vars:
+  # Key auth only; ./update creates the key pair and prints the public key.
+  auth_methods: [publickey]
+  ssh_keys: /home/oxidized/.config/oxidized/keys/devices_ed25519
+groups: {}
+pid: /home/oxidized/.config/oxidized/pid
+crash:
+  directory: /home/oxidized/.config/oxidized/crashes
+  hostnames: false
+stats:
+  history_size: 10
+input:
+  default: ssh
+  ssh:
+    # Host keys are not pinned (no known_hosts in the container). The devices
+    # are on the management VLAN and the user can only read.
+    secure: false
+output:
+  default: git
+  git:
+    user: Oxidized
+    email: oxidized@oxidized.lan
+    repo: /home/oxidized/.config/oxidized/network-config.git
+source:
+  default: csv
+  csv:
+    file: /home/oxidized/.config/oxidized/router.db
+    delimiter: !ruby/regexp /:/
+    map:
+      name: 0
+      ip: 1
+      model: 2
+hooks:
+  # Push every stored change to the private backup repo with a write deploy key.
+  push_to_github:
+    type: githubrepo
+    events: [post_store]
+    remote_repo: git@github.com:dnyw4l3n13/network-config.git
+    publickey: /home/oxidized/.config/oxidized/keys/deploy_ed25519.pub
+    privatekey: /home/oxidized/.config/oxidized/keys/deploy_ed25519

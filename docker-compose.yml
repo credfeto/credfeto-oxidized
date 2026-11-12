@@ -1,0 +1,32 @@
+---
+# Oxidized: hourly config backups of the network devices, committed to a local
+# git repo and pushed to the private backup repo (see oxidized/config).
+#
+# Runtime state (config copy, device list, SSH keys, local git repo) lives in
+# DATA_DIR on the host, outside the checkout; ./update refreshes it from this
+# repo. No ports are published: the REST/web UI is disabled.
+name: credfeto-oxidized
+
+services:
+  watchtower:
+    image: nickfedor/watchtower:latest
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    environment:
+      WATCHTOWER_NOTIFICATIONS_HOSTNAME: oxidized
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_SCHEDULE: "${WATCHTOWER_SCHEDULE:-0 52 * * * *}"
+
+  oxidized:
+    image: oxidized/oxidized:${OXIDIZED_TAG:-latest}
+    container_name: oxidized
+    restart: unless-stopped
+    environment:
+      # Re-read the device list every hour so router.db changes need no restart.
+      CONFIG_RELOAD_INTERVAL: "3600"
+    volumes:
+      - ${DATA_DIR:-/var/lib/credfeto-oxidized}:/home/oxidized/.config/oxidized
+    mem_limit: 512m
+    pids_limit: 256
