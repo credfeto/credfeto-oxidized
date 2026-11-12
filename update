@@ -33,6 +33,9 @@ for key in devices deploy; do
     fi
 done
 chmod 0600 "$DATA_DIR"/keys/*_ed25519
+# Oxidized commits to HEAD and the githubrepo hook pushes that branch. Create the
+# local repo with main as HEAD so backups land on main, not a new master branch.
+[ -d "$DATA_DIR/network-config.git" ] || git init -q --bare -b main "$DATA_DIR/network-config.git"
 chown -R "$OX_UID:$OX_GID" "$DATA_DIR"
 
 docker compose up -d
