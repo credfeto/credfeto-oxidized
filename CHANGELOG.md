@@ -10,6 +10,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 
 ## [Unreleased]
 ### Security
+- Host egress lockdown (`firewall/configure`, run by `update`): firewalld policies limit what the host and the containers may connect to (Oxidized: SSH to the devices in `oxidized/router.db` and to GitHub), with CDN-fronted destinations kept in ipsets refreshed every 10 minutes. `oxidized-firewall-sync.timer` re-applies it when the firewall config changes, and the daily `Repo: Update egress ranges` workflow refreshes the GitHub and Cloudflare ranges. Observation mode (log unmatched traffic, drop nothing) until `OXIDIZED_FIREWALL_ENFORCE=true`
 ### Added
 - Oxidized stack (docker compose + watchtower) backing up the MikroTik switches hourly to dnyw4l3n13/network-config; ./update installs the config into DATA_DIR and creates the device and deploy SSH keys
 ### Fixed
