@@ -7,7 +7,12 @@ cd "$BASEDIR"
 [ -f .env ] || { echo "update: create .env from example.env first" >&2; exit 1; }
 env_value() { sed -n "s/^$1=//p" .env | tail -n 1; }
 
-git pull --ff-only
+# sh has already parsed this script, so changes the pull brings to it would
+# only take effect on the next run. Re-run the freshly pulled copy once.
+if [ "${UPDATE_ALREADY_PULLED:-}" != "1" ]; then
+    git pull --ff-only
+    UPDATE_ALREADY_PULLED=1 exec "$(readlink -f "$0")" "$@"
+fi
 DATA_DIR=$(env_value DATA_DIR)
 DATA_DIR=${DATA_DIR:-/var/lib/credfeto-oxidized}
 IMAGE="oxidized/oxidized:$(env_value OXIDIZED_TAG)"
