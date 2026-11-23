@@ -19,6 +19,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - update: key comments use `uname -n` (Arch has no `hostname` binary)
 - GitHub push failing with "invalid or unknown remote ssh hostkey": ship GitHub's SSH host keys as oxidized/known_hosts, installed into DATA_DIR/ssh and mounted read-only at /home/oxidized/.ssh
 ### Changed
+- The host egress firewall is now one nftables table (`inet oxd_egress`) loaded atomically by `firewall/egress`, instead of firewalld policies and ipsets: the 10-minute refresh reloaded firewalld, and a firewalld killed mid-reload (by the OOM killer) left its block-everything table in place and cut the host off. `firewall/configure` removes the old policies and ipsets with one last reload
 ### Deprecated
 ### Removed
 ### Deployment Changes
