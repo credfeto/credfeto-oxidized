@@ -22,7 +22,7 @@ services:
   oxidized:
     image: oxidized/oxidized:${OXIDIZED_TAG:-latest}
     container_name: oxidized
-    restart: unless-stopped
+    restart: always
     environment:
       # Re-read the device list every hour so router.db changes need no restart.
       CONFIG_RELOAD_INTERVAL: "3600"

@@ -16,11 +16,13 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 - Oxidized stack (docker compose + watchtower) backing up the MikroTik switches hourly to dnyw4l3n13/network-config; ./update installs the config into DATA_DIR and creates the device and deploy SSH keys
 ### Fixed
+- The egress script takes a lock and writes its resolved-address cache to a unique temp file, so the refresh timer and the firewall sync starting together no longer fail with FileNotFoundError over the shared .tmp file
 - `./update` now re-runs itself after `git pull`, so changes to the update script take effect on the same run instead of the next one
 - update: create the local backup repo with `main` as HEAD so the push goes to main instead of creating a master branch
 - update: key comments use `uname -n` (Arch has no `hostname` binary)
 - GitHub push failing with "invalid or unknown remote ssh hostkey": ship GitHub's SSH host keys as oxidized/known_hosts, installed into DATA_DIR/ssh and mounted read-only at /home/oxidized/.ssh
 ### Changed
+- All containers use `restart: always` instead of `unless-stopped`, so a container stopped during a reboot or daemon restart is always brought back (an unless-stopped container was left down after a clean reboot)
 - The host egress firewall is now one nftables table (`inet oxd_egress`) loaded atomically by `firewall/egress`, instead of firewalld policies and ipsets: the 10-minute refresh reloaded firewalld, and a firewalld killed mid-reload (by the OOM killer) left its block-everything table in place and cut the host off. `firewall/configure` removes the old policies and ipsets with one last reload
 ### Deprecated
 ### Removed
